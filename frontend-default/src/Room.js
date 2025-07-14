@@ -3,7 +3,7 @@ import io from 'socket.io-client';
 import SimplePeer from 'simple-peer';
 import ReactPlayer from 'react-player';
 import {
-  Box, Button, Container, Grid, Paper, TextField, Typography, IconButton, Stack, AppBar, Toolbar, Tooltip, Avatar, InputAdornment, List, ListItem, ListItemAvatar, ListItemText, Divider
+  Box, Button, Container, Grid, Paper, TextField, Typography, IconButton, Stack, AppBar, Toolbar, Tooltip, Avatar, InputAdornment, List, ListItem, ListItemAvatar, ListItemText
 } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
@@ -17,7 +17,6 @@ import MicOffIcon from '@mui/icons-material/MicOff';
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 
 const SERVER_URL = 'http://localhost:3000'; // Change to deployed backend URL when deploying
-
 const EMOJIS = ['😀','😂','😍','👍','👏','🎉','😮','😢','😡'];
 
 function Room({ roomId }) {
@@ -52,7 +51,7 @@ function Room({ roomId }) {
       const newPeers = [];
       userList.forEach(({ socketId, userId: uid }) => {
         if (socketId !== socketRef.current.id) {
-          const peer = createPeer(socketId, roomId);
+          const peer = createPeer(socketId, true); // initiator
           peersRef.current.push({ peerID: socketId, peer, userId: uid });
           newPeers.push({ peerID: socketId, peer, userId: uid });
         }
@@ -62,9 +61,12 @@ function Room({ roomId }) {
 
     socketRef.current.on('user-joined', ({ socketId, userId: uid }) => {
       setUsers(users => [...users, { socketId, userId: uid }]);
-      const peer = addPeer(socketId, roomId);
-      peersRef.current.push({ peerID: socketId, peer, userId: uid });
-      setPeers(users => [...users, { peerID: socketId, peer, userId: uid }]);
+      // Existing users create a peer connection to the new user (not initiator)
+      if (socketId !== socketRef.current.id) {
+        const peer = createPeer(socketId, false); // not initiator
+        peersRef.current.push({ peerID: socketId, peer, userId: uid });
+        setPeers(users => [...users, { peerID: socketId, peer, userId: uid }]);
+      }
     });
 
     socketRef.current.on('signal', ({ from, signal }) => {
@@ -109,18 +111,10 @@ function Room({ roomId }) {
   }, [roomId]);
 
   // WebRTC helpers
-  function createPeer(userToSignal, roomId) {
-    const peer = new SimplePeer({ initiator: true, trickle: false, stream: localStream.current });
+  function createPeer(peerID, initiator) {
+    const peer = new SimplePeer({ initiator, trickle: false, stream: localStream.current });
     peer.on('signal', signal => {
-      socketRef.current.emit('signal', { roomId, signal, to: userToSignal });
-    });
-    return peer;
-  }
-
-  function addPeer(incomingID, roomId) {
-    const peer = new SimplePeer({ initiator: false, trickle: false, stream: localStream.current });
-    peer.on('signal', signal => {
-      socketRef.current.emit('signal', { roomId, signal, to: incomingID });
+      socketRef.current.emit('signal', { roomId, signal, to: peerID });
     });
     return peer;
   }
@@ -333,4 +327,4 @@ function Video({ peer }) {
   return <video ref={ref} autoPlay playsInline style={{ width: '100%', background: '#222' }} />;
 }
 
-export default Room; 
+export default Room;
