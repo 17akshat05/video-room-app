@@ -16,7 +16,7 @@ import MicIcon from '@mui/icons-material/Mic';
 import MicOffIcon from '@mui/icons-material/MicOff';
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 
-const SERVER_URL = 'http://localhost:3000'; // Change to deployed backend URL when deploying
+const SERVER_URL = 'https://video-room-app.onrender.com';
 const EMOJIS = ['😀','😂','😍','👍','👏','🎉','😮','😢','😡'];
 
 function Room({ roomId }) {
