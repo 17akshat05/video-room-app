@@ -16,7 +16,7 @@ import MicIcon from '@mui/icons-material/Mic';
 import MicOffIcon from '@mui/icons-material/MicOff';
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 
-const SERVER_URL = 'https://video-room-app.onrender.com';
+const SERVER_URL = process.env.REACT_APP_BACKEND_URL || 'https://video-room-app.onrender.com';
 const EMOJIS = ['😀','😂','😍','👍','👏','🎉','😮','😢','😡'];
 
 function Room({ roomId }) {

@@ -39,6 +39,20 @@ Instead, it will copy all the configuration files and the transitive dependencie
 
 You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
 
+## Environment Variables
+
+To configure the backend server URL, set the environment variable `REACT_APP_BACKEND_URL`.
+
+For local development, create a `.env` file in the project root:
+
+```
+REACT_APP_BACKEND_URL=https://video-room-app.onrender.com
+```
+
+For Vercel deployment, add `REACT_APP_BACKEND_URL` as an Environment Variable in your Vercel project settings.
+
+If not set, the app defaults to `https://video-room-app.onrender.com`.
+
 ## Learn More
 
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
