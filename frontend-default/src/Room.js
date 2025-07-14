@@ -2,6 +2,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import io from 'socket.io-client';
 import SimplePeer from 'simple-peer';
 import ReactPlayer from 'react-player';
+import {
+  Box, Button, Container, Grid, Paper, TextField, Typography, IconButton, Stack, AppBar, Toolbar, Tooltip
+} from '@mui/material';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import PauseIcon from '@mui/icons-material/Pause';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import FullscreenIcon from '@mui/icons-material/Fullscreen';
+import LinkIcon from '@mui/icons-material/Link';
 
 const SERVER_URL = 'http://localhost:3000'; // Change to deployed backend URL when deploying
 
@@ -111,36 +119,93 @@ function Room({ roomId }) {
   }, []);
 
   return (
-    <div>
-      <h2>Room: {roomId}</h2>
-      <div style={{ display: 'flex', gap: 20 }}>
-        <div>
-          <video ref={localVideoRef} autoPlay muted playsInline style={{ width: 200, border: '1px solid #ccc' }} />
-          {peers.map(({ peerID, peer }) => (
-            <Video key={peerID} peer={peer} />
-          ))}
-        </div>
-        <div>
-          <input
-            value={videoUrl}
-            onChange={e => setVideoUrl(e.target.value)}
-            placeholder="Paste YouTube URL"
-            style={{ width: 300 }}
-          />
-          <ReactPlayer
-            ref={playerRef}
-            url={videoUrl}
-            playing={playing}
-            onPlay={handlePlay}
-            onPause={handlePause}
-            onSeek={handleSeek}
-            onProgress={({ playedSeconds }) => setPlayed(playedSeconds)}
-            controls
-            width={400}
-          />
-        </div>
-      </div>
-    </div>
+    <Container maxWidth="lg" sx={{ mt: 4 }}>
+      <AppBar position="static" color="primary" sx={{ mb: 3, borderRadius: 2 }}>
+        <Toolbar>
+          <Typography variant="h5" sx={{ flexGrow: 1 }}>
+            Room: {roomId}
+          </Typography>
+          <Tooltip title="Copy Room Link">
+            <IconButton color="inherit" onClick={() => navigator.clipboard.writeText(window.location.href)}>
+              <LinkIcon />
+            </IconButton>
+          </Tooltip>
+        </Toolbar>
+      </AppBar>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={6}>
+          <Paper elevation={4} sx={{ p: 2, bgcolor: 'background.paper', mb: 2 }}>
+            <Typography variant="h6" color="secondary" gutterBottom>
+              Video Call Screens
+            </Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={6}>
+                <Box sx={{ position: 'relative', borderRadius: 2, overflow: 'hidden', border: '2px solid #1976d2' }}>
+                  <video ref={localVideoRef} autoPlay muted playsInline style={{ width: '100%', background: '#222' }} />
+                  <Typography variant="caption" sx={{ position: 'absolute', bottom: 8, left: 8, color: '#fff', bgcolor: 'rgba(0,0,0,0.5)', px: 1, borderRadius: 1 }}>
+                    You
+                  </Typography>
+                </Box>
+              </Grid>
+              {peers.map(({ peerID, peer }) => (
+                <Grid item xs={6} key={peerID}>
+                  <Box sx={{ position: 'relative', borderRadius: 2, overflow: 'hidden', border: '2px solid #ff4081' }}>
+                    <Video peer={peer} />
+                    <Typography variant="caption" sx={{ position: 'absolute', bottom: 8, left: 8, color: '#fff', bgcolor: 'rgba(0,0,0,0.5)', px: 1, borderRadius: 1 }}>
+                      {peerID}
+                    </Typography>
+                  </Box>
+                </Grid>
+              ))}
+            </Grid>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Paper elevation={4} sx={{ p: 2, bgcolor: 'background.paper' }}>
+            <Typography variant="h6" color="secondary" gutterBottom>
+              Shared Player
+            </Typography>
+            <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
+              <TextField
+                label="YouTube URL"
+                value={videoUrl}
+                onChange={e => setVideoUrl(e.target.value)}
+                variant="outlined"
+                size="small"
+                sx={{ flex: 1 }}
+              />
+              <IconButton color="primary" onClick={handlePlay} disabled={playing}>
+                <PlayArrowIcon />
+              </IconButton>
+              <IconButton color="primary" onClick={handlePause} disabled={!playing}>
+                <PauseIcon />
+              </IconButton>
+              <IconButton color="primary">
+                <VolumeUpIcon />
+              </IconButton>
+              <IconButton color="primary" onClick={() => playerRef.current && playerRef.current.wrapper.requestFullscreen && playerRef.current.wrapper.requestFullscreen()}>
+                <FullscreenIcon />
+              </IconButton>
+            </Stack>
+            <Box sx={{ borderRadius: 2, overflow: 'hidden', border: '2px solid #1976d2', bgcolor: '#000' }}>
+              <ReactPlayer
+                ref={playerRef}
+                url={videoUrl}
+                playing={playing}
+                onPlay={handlePlay}
+                onPause={handlePause}
+                onSeek={handleSeek}
+                onProgress={({ playedSeconds }) => setPlayed(playedSeconds)}
+                controls
+                width="100%"
+                height="320px"
+                style={{ background: '#000' }}
+              />
+            </Box>
+          </Paper>
+        </Grid>
+      </Grid>
+    </Container>
   );
 }
 
@@ -153,7 +218,7 @@ function Video({ peer }) {
       }
     });
   }, [peer]);
-  return <video ref={ref} autoPlay playsInline style={{ width: 200, border: '1px solid #ccc' }} />;
+  return <video ref={ref} autoPlay playsInline style={{ width: '100%', background: '#222' }} />;
 }
 
 export default Room; 
